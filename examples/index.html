@@ -1,0 +1,83 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=8;IE=9"/>
+		<title>Test ccd3</title>
+		<link rel="stylesheet" href="./../ctd3.css" type="text/css" />
+		<script type="text/javascript" src="./../vendor/d3.v3/d3.v3.js"></script>
+		<script type="text/javascript" src="./../ctd3.js"></script>
+		<script type="text/javascript" src="./../dataset_sample.js"></script>
+		<style type="text/css">
+<!--
+#charts > div{
+	float:left;
+}
+-->
+		</style>
+		<script type="text/javascript">
+<!--
+window.onload = function(){
+	(function(){
+		var div_id = "table1";
+		/* prepare dataset */
+
+		var cond = {
+			row_cnt: 1000,
+			random_ceil: 20000,
+			cols:[
+				{name:"hoge", data_func: ctd3t.sequence_int},
+				{name:"piyo", data_func: ctd3t.sequence_str},
+			]
+		};
+		for(var i=0;i<100;i++){
+			if(i%2 == 1){
+				cond.cols.push({name:"col"+i, data_func:ctd3t.random_int})
+			}else{
+				cond.cols.push({name:"col"+i, data_func:ctd3t.random_str})
+			}
+		}
+		var data = (new ctd3t.DatasetGenerator(cond)).generate();
+		
+		var t = new ctd3.Table(div_id,data);
+		
+		/* render chart */
+		t.render();
+		
+		d3.select("#scroll_row_up").on("click",function(){
+			t.dataset_manager.scroll_row_view.call(t.dataset_manager,-10);
+			t.render();
+		});
+		d3.select("#scroll_row_down").on("click",function(){
+			t.dataset_manager.scroll_row_view.call(t.dataset_manager,10);
+			t.render();
+		});
+		d3.select("#scroll_col_left").on("click",function(){
+			t.dataset_manager.scroll_col_view.call(t.dataset_manager,-10);
+			t.render();
+		});
+		d3.select("#scroll_col_right").on("click",function(){
+			t.dataset_manager.scroll_col_view.call(t.dataset_manager,10);
+			t.render();
+		});
+	})();
+};
+-->
+		</script>
+	</head>
+	<body>
+		<h1>ccd3 sample charts</h1>
+		<ul>
+			<li><a href="./hoge.html">hoge example</a></li>
+		</ul>
+		<p>
+			<span id="scroll_row_up">▲</span>|
+			<span id="scroll_row_down">▼</span>|
+			<span id="scroll_col_left">◀</span>|
+			<span id="scroll_col_right">▶</span>
+		</p>
+		<div id="tables">
+			<div id="table1" style="width:80%;height:50%;">
+			</div>
+		</div>
+	</body>
+</html>

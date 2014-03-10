@@ -6,6 +6,10 @@
 .ctd3 table{
 	border-collapse: separate;
 	border-spacing: 0;
+	max-width: 100%;
+	empty-cells: show;
+	word-wrap:break-word;
+	word-break:break-all;
 }
 
 .ctd3 table td,
@@ -14,26 +18,45 @@
 	border-left: lightgray solid 1px;
 	padding: 5px;
 }
-.ctd3 table tbody.ctd3_tbody_head td,
-.ctd3 table tbody.ctd3_tbody_foot td{
-	padding: 0px;
-	text-align: center;
+.ctd3 table tbody tr:last-child td {
+	border-bottom: lightgray solid 1px;
+}
+.ctd3 table tr td:last-child,
+.ctd3 table tr th:last-child {
+	border-right: lightgray solid 1px;
 }
 
 .ctd3 table th{
 	background-color:#eeeeee;
 }
 
-.ctd3 table tr:hover.ctd3_tr_data{
+.ctd3 table tbody.ctd3_tbody_scroll_up td,
+.ctd3 table tbody.ctd3_tbody_scroll_down td{
+	padding: 5px;
+	text-align: center;
+}
+.ctd3 table tbody.ctd3_tbody_scroll_up td:hover,
+.ctd3 table tbody.ctd3_tbody_scroll_down td:hover{
+	background-color:#eeeeee;
+}
+.ctd3 table td.ctd3_td_scroll_right,
+.ctd3 table td.ctd3_td_scroll_left{
+	padding: 5px;
+	text-align: center;
+	border-bottom: lightgray solid 1px;
+}
+.ctd3 table td.ctd3_td_scroll_right:hover,
+.ctd3 table td.ctd3_td_scroll_left:hover{
 	background-color:#eeeeee;
 }
 
-.ctd3 table tbody:last-child tr:last-child td {
-	border-bottom: lightgray solid 1px;
+
+
+.ctd3 table tr.ctd3_tr_data td{
 }
-.ctd3 table tr td:last-child,
-.ctd3 table tr th:last-child {
-	border-right: lightgray solid 1px;
+
+.ctd3 table tr:hover.ctd3_tr_data{
+	background-color:#eeeeee;
 }
 
 /* hide td */
@@ -45,16 +68,22 @@
 
 /* round corner */
 .ctd3 table th:first-child {
-	border-radius:5px 0 0 0;
+	border-top-left-radius: 5px;
 }
 .ctd3 table th:last-child {
-	border-radius:0 5px 0 0;
+	border-top-right-radius: 5px;
 }
 .ctd3 table tbody:last-child tr:last-child td:first-child {
-	border-radius:0 0 0 5px;
+	border-bottom-left-radius: 5px;
 }
 .ctd3 table tbody:last-child tr:last-child td:last-child {
-	border-radius:0 0 5px 0;
+	border-bottom-right-radius: 5px;
+}
+.ctd3 table tbody:last-child tr.ctd3_tr_scroll td:first-child {
+	border-bottom-left-radius: 5px;
+}
+.ctd3 table tbody:last-child tr.ctd3_tr_scroll td:last-child {
+	border-bottom-right-radius: 5px;
 }
 
 /**/

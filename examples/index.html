@@ -22,14 +22,15 @@ window.onload = function(){
 		/* prepare dataset */
 
 		var cond = {
-			row_cnt: 1000,
+			row_cnt: 35,
 			random_ceil: 20000,
+			random_str_len: 5,
 			cols:[
 				{name:"hoge", data_func: ctd3t.sequence_int},
 				{name:"piyo", data_func: ctd3t.sequence_str},
 			]
 		};
-		for(var i=0;i<100;i++){
+		for(var i=0;i<35;i++){
 			if(i%2 == 1){
 				cond.cols.push({name:"col"+i, data_func:ctd3t.random_int})
 			}else{
@@ -43,22 +44,6 @@ window.onload = function(){
 		/* render chart */
 		t.render();
 		
-		d3.select("#scroll_row_up").on("click",function(){
-			t.dataset_manager.scroll_row_view.call(t.dataset_manager,-10);
-			t.render();
-		});
-		d3.select("#scroll_row_down").on("click",function(){
-			t.dataset_manager.scroll_row_view.call(t.dataset_manager,10);
-			t.render();
-		});
-		d3.select("#scroll_col_left").on("click",function(){
-			t.dataset_manager.scroll_col_view.call(t.dataset_manager,-10);
-			t.render();
-		});
-		d3.select("#scroll_col_right").on("click",function(){
-			t.dataset_manager.scroll_col_view.call(t.dataset_manager,10);
-			t.render();
-		});
 	})();
 };
 -->
@@ -69,14 +54,8 @@ window.onload = function(){
 		<ul>
 			<li><a href="./hoge.html">hoge example</a></li>
 		</ul>
-		<p>
-			<span id="scroll_row_up">▲</span>|
-			<span id="scroll_row_down">▼</span>|
-			<span id="scroll_col_left">◀</span>|
-			<span id="scroll_col_right">▶</span>
-		</p>
 		<div id="tables">
-			<div id="table1" style="width:80%;height:50%;">
+			<div id="table1" style="width:100%;">
 			</div>
 		</div>
 	</body>

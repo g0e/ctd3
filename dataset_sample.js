@@ -80,6 +80,12 @@ var ctd3t = function(){
 				this.dataset[i].values.push(value);
 	};
 	
+	/**/
+	ctd3t.repeat_weekday = function(pos){
+		var wd = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+		return wd[pos.row_pos % wd.length];
+	};
+	
 	/* matrix */
 	ctd3t.matrix_x_int = function(pos){
 		return parseInt((pos.row_pos + 1) % Math.pow(this.values_cnt,0.5)) + 1;

@@ -16,9 +16,8 @@
 .ctd3 table th{
 	border-top: lightgray solid 1px;
 	border-left: lightgray solid 1px;
-	padding: 5px;
 }
-.ctd3 table tbody tr:last-child td {
+.ctd3 table tfoot tr:last-child th {
 	border-bottom: lightgray solid 1px;
 }
 .ctd3 table tr td:last-child,
@@ -30,14 +29,80 @@
 	background-color:#eeeeee;
 }
 
-.ctd3 table tbody.ctd3_tbody_scroll_up td,
-.ctd3 table tbody.ctd3_tbody_scroll_down td{
+/* contents box */
+div.ctd3_cell_div{
+	height: 1.3em;
+	width: 6em; /* default */
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin: 5px;
+	box-sizing:border-box;
+}
+div.ctd3_cell_div > input{
+	width: 100%;
+	height: 100%;
+	box-sizing:border-box;
+}
+/*
+tr.ctd3_tr_data:hover div.ctd3_cell_div{
+	white-space: normal;
+	overflow: visible;
+	height: auto;
+}
+*/
+.ctd3 table tr:hover.ctd3_tr_data{
+	background-color:#eeeeee;
+}
+
+.ctd3_tfoot_div{
+	height: 1.3em;
+	font-size: small;
+	margin: 5px;
+}
+
+/* hidden td */
+.ctd3 td.ctd3_td_empty{
+	padding:0;
+	margin:0;
+	border:0;
+}
+
+div.ctd3_div_empty_dataset{
+	height: 1.3em;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin: 5px;
+	box-sizing:border-box;
+	text-align: center;
+}
+
+/* round corner */
+.ctd3 table thead tr:first-child th:first-child {
+	border-top-left-radius: 5px;
+}
+.ctd3 table thead tr:first-child th:last-child {
+	border-top-right-radius: 5px;
+}
+.ctd3 table tfoot tr:last-child th:last-child {
+	border-bottom-left-radius: 5px;
+}
+.ctd3 table tfoot tr:last-child th:last-child {
+	border-bottom-right-radius: 5px;
+}
+
+
+/* scroll div */
+div.ctd3_scroll_up_div,
+div.ctd3_scroll_down_div{
 	padding: 5px;
 	text-align: center;
+	height: 1.3em;
 }
 .ctd3 table tbody.ctd3_tbody_scroll_up td:hover,
 .ctd3 table tbody.ctd3_tbody_scroll_down td:hover{
-	background-color:#eeeeee;
+	background-color:lightyellow;
 }
 .ctd3 table td.ctd3_td_scroll_right,
 .ctd3 table td.ctd3_td_scroll_left{
@@ -47,43 +112,7 @@
 }
 .ctd3 table td.ctd3_td_scroll_right:hover,
 .ctd3 table td.ctd3_td_scroll_left:hover{
-	background-color:#eeeeee;
-}
-
-
-
-.ctd3 table tr.ctd3_tr_data td{
-}
-
-.ctd3 table tr:hover.ctd3_tr_data{
-	background-color:#eeeeee;
-}
-
-/* hide td */
-.ctd3 td.ctd3_td_empty{
-	padding:0;
-	margin:0;
-	border:0;
-}
-
-/* round corner */
-.ctd3 table th:first-child {
-	border-top-left-radius: 5px;
-}
-.ctd3 table th:last-child {
-	border-top-right-radius: 5px;
-}
-.ctd3 table tbody:last-child tr:last-child td:first-child {
-	border-bottom-left-radius: 5px;
-}
-.ctd3 table tbody:last-child tr:last-child td:last-child {
-	border-bottom-right-radius: 5px;
-}
-.ctd3 table tbody:last-child tr.ctd3_tr_scroll td:first-child {
-	border-bottom-left-radius: 5px;
-}
-.ctd3 table tbody:last-child tr.ctd3_tr_scroll td:last-child {
-	border-bottom-right-radius: 5px;
+	background-color:lightyellow;
 }
 
 /**/

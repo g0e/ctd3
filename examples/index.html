@@ -44,24 +44,23 @@ window.onload = function(){
 		
 		var meta = {
 			hoge: { order:2, label:"ほげ", width: 50 },
-			piyo: { order:1, label:"ぴよ" },
+			piyo: { order:1, label:"ぴよ", visualize:"bar" },
 			col1: { order:3, width: 100, text_format: d3.format("%") },
-			col4: { order:-1 },
+			col4: { order:-1, visualize:"gradation" },
 			col3: { filter_type:"select" },
+			col2: { width: 300 }
 		};
 		t.setup_meta(meta);
 
 		var options = {
-			view_row_cursor: 0,
-			view_col_cursor: 0,
-			view_row_size: 10,
-			view_col_size: 7,
-			view_fix_col_size: 2,
+			row_cursor: 0,
+			col_cursor: 0,
+			table_row_size: 10,
+			table_col_size: 7,
+			table_fix_col_size: 2,
 			show_filter_form: true
 		};
-		t.setup_dm_options(options);
-		t.dm.enable_incell_visualize("col1");
-		t.dm.enable_incell_visualize("col4","gradation");
+		t.setup_options(options);
 		t.render();
 		
 		var t2 = new ctd3.Table("table2",data);

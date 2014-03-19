@@ -25,6 +25,9 @@
 	border-right: lightgray solid 1px;
 }
 
+.ctd3 table tbody tr{
+	background-color:#fff;
+}
 .ctd3 table thead th{
 	background-color:#eee;
 }
@@ -37,6 +40,11 @@
 	background-color:#eee;
 }
 */
+
+.ctd3 table caption{
+	font-weight: bold;
+	padding: 5px;
+}
 
 /* contents box */
 div.ctd3_cell_div{
@@ -59,16 +67,15 @@ tr.ctd3_tr_data:hover div.ctd3_cell_div{
 	overflow: visible;
 	height: auto;
 }
-
 .ctd3 table tr:hover.ctd3_tr_data{
 	background-color:lightyellow;
 }
 
 .ctd3_tfoot_div{
 	height: 1.5em;
-	font-size: small;
 	margin: 5px;
 }
+
 
 /* hidden td */
 .ctd3 td.ctd3_td_empty{

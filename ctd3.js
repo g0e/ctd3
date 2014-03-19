@@ -53,7 +53,17 @@ var ctd3 = function(){
 		this.tag_table = {};
 		this.dataset = {};
 		this.meta = [];
-		
+
+		// table options
+		this.caption = undefined;
+		this.row_cursor = 0;
+		this.col_cursor =  0;
+		this.table_row_size = 10;
+		this.table_col_size = 12;
+		this.table_fix_col_size = 0;
+		this.show_filter_form = true;
+		this.show_footer_info = true;
+
 		this.loader = new ctd3.DatasetLoader(this);
 		this.init_dataset(dataset);
 	};
@@ -64,15 +74,15 @@ var ctd3 = function(){
 		}
 		this.dataset = this.dataset_manager.setup_dataset(dataset);
 		this.meta = this.dataset_manager.create_default_meta();
-		this.dm.view_col_cursor = this.dm.view_fix_col_size;
+		this.col_cursor = this.table_fix_col_size;
 	};
 	ctd3.Table.prototype.setup_meta = function(meta){
 		this.dataset_manager.setup_meta(meta);
 		this.dataset_manager.sort_meta();
 	};
-	ctd3.Table.prototype.setup_dm_options = function(options){
-		ctd3.Util.merge(this.dataset_manager,options);
-		this.dm.view_col_cursor = this.dm.view_fix_col_size;
+	ctd3.Table.prototype.setup_options = function(options){
+		ctd3.Util.merge(this,options);
+		this.col_cursor = this.table_fix_col_size;
 	};
 	ctd3.Table.prototype.render = function(cond){
 		if(!(this.tag_table instanceof ctd3.Parts.TagTable)){
@@ -131,10 +141,11 @@ var ctd3 = function(){
 		};
 	};
 	ctd3.Parts.TagTable.prototype.render = function(){
+		var that = this;
+		var table = this.table;
 		var dataset = this.table.dataset_manager.ds_view;
 		var meta = this.table.dataset_manager.meta_view;
 		var dm = this.table.dataset_manager;
-		var that = this;
 		
 		/********** initialize **********/
 		if(!(this.div)){
@@ -143,31 +154,10 @@ var ctd3 = function(){
 				.append("div").attr("class","ctd3_tag_table");
 			this.tag_table = this.div.append("table");
 			
-			/*
-			// http://help.dottoro.com/ljqeknfl.php
-			var mousewheel_func = function(event){
-				var rolled = 0;
-				if ('wheelDelta' in event) {
-					rolled = event.wheelDelta;
-				}
-				else {  // Firefox
-					// The measurement units of the detail and wheelDelta properties are different.
-					rolled = -40 * event.detail;
-				}
-				if(rolled > 0){
-					dm.scroll_row_view.call(dm,-1);
-					that.table.render({table_render_only:true});
-				}else if(rolled < 0){
-					dm.scroll_row_view.call(dm,1);
-					that.table.render({table_render_only:true});
-				}
-				event.preventDefault();
-				event.returnValue = false;
-				return false;
-			};
-			this.tag_table[0][0].addEventListener("mousewheel", mousewheel_func, false);
-			this.tag_table[0][0].addEventListener("DOMMouseScroll", mousewheel_func, false);
-			*/
+			// caption
+			if(table.caption){
+				this.tag_table.append("caption").text(table.caption);
+			}
 
 			// thead
 			this.tag_thead = this.tag_table.append("thead");
@@ -218,7 +208,7 @@ var ctd3 = function(){
 		/********** add meta dummy for scroll_left/right **********/
 		if(dataset.length>0){
 			if(dm.can_scroll_left()){
-				meta.unshift({name:"__scroll_left", __pos:dm.view_fix_col_size - 0.5});
+				meta.unshift({name:"__scroll_left", __pos:table.table_fix_col_size - 0.5});
 			}
 			if(dm.can_scroll_right()){
 				meta.push({name:"__scroll_right", __pos:meta.length});
@@ -251,7 +241,7 @@ var ctd3 = function(){
 								metas[i].sort = null;
 							}
 						}
-						dm.view_row_cursor = 0;
+						table.row_cursor = 0;
 						that.table.render({skip_filter_dataset:true});
 					})
 					.append("div")
@@ -287,7 +277,7 @@ var ctd3 = function(){
 		th.exit().remove();
 		
 		/********** thead filter **********/
-		if(dm.show_filter_form){
+		if(this.table.show_filter_form){
 			// data join
 			th = this.tag_thead_tr_filter.selectAll("th.ctd3_th_filter").data(meta,function(d){ return d.name; });
 			
@@ -442,23 +432,35 @@ var ctd3 = function(){
 		
 		/********** tfoot **********/
 		this.tag_tfoot_div.select("*").remove();
-		this.tag_tfoot_div
-			.call(function(div){
-				div.append("span")
-					.text(function(){
-						var html = "";
-						html += "shown=" + (dm.view_row_cursor+1) + "-" + (dm.view_row_cursor + dataset.length);
-						html += " / ";
-						html += "filtered=" + dm.ds_sorted.length;
-						html += " / ";
-						html += "overall=" + dm.dataset.length;
-						return html;
-					});
+		if(table.show_footer_info && dataset.length != dm.dataset.length){
+			this.tag_tfoot_div
+				.attr("style",null)
+				.call(function(div){
+					div.append("span")
+						.text(function(){
+							var html = "";
+							if(dataset.length > 0){
+								html += "shown=" + (table.row_cursor+1) + "-" + (table.row_cursor + dataset.length);
+							}else{
+								html += "shown=NA";
+							}
+							html += " / ";
+							if(dm.ds_sorted.length != dm.dataset.length){
+								html += "filtered=" + dm.ds_sorted.length;
+								html += " / ";
+							}
+							html += "total=" + dm.dataset.length;
+							return html;
+						});
 			});
+		}else{
+			this.tag_tfoot_div.attr("style","height:0.5em");
+		}
 
 	};
 	ctd3.Parts.TagTable.prototype.create_filter_form = function(div,meta){
 		var that = this;
+		var table = this.table;
 		var dm = this.table.dataset_manager;
 		
 		if(meta.name.substring(0,2) == "__"){ return; }
@@ -477,8 +479,8 @@ var ctd3 = function(){
 					}else{
 						meta.filter_value = undefined;
 					}
-					dm.view_row_cursor = 0;
-					that.table.render();
+					table.row_cursor = 0;
+					table.render();
 				});
 		}else if(meta.filter_type == "select"){
 			var select = div.append("select");
@@ -505,8 +507,8 @@ var ctd3 = function(){
 					}else{
 						meta.filter_value = undefined;
 					}
-					dm.view_row_cursor = 0;
-					that.table.render();
+					table.row_cursor = 0;
+					table.render();
 				});
 		}
 	};
@@ -515,7 +517,8 @@ var ctd3 = function(){
 		if(!(td.select(".ctd3_scroll_up_div")[0][0])){
 			td.style("cursor","pointer")
 				.on("click",function(){
-					table.dataset_manager.scroll_row_view.call(table.dataset_manager,-1*dm.view_row_size);
+					table.row_cursor -= table.table_row_size;
+					dm.reset_view();
 					table.render({table_render_only:true});
 				})
 				.append("div").attr("class","ctd3_scroll_up_div")
@@ -527,7 +530,8 @@ var ctd3 = function(){
 		if(!(td.select(".ctd3_scroll_down_div")[0][0])){
 			td.style("cursor","pointer")
 				.on("click",function(){
-					table.dataset_manager.scroll_row_view.call(table.dataset_manager,dm.view_row_size);
+					table.row_cursor += table.table_row_size;
+					dm.reset_view();
 					table.render({table_render_only:true});
 				})
 				.append("div").attr("class","ctd3_scroll_down_div")
@@ -539,8 +543,8 @@ var ctd3 = function(){
 		if(!(td.select(".ctd3_scroll_left_div")[0][0])){
 			td.style("cursor","pointer")
 				.on("click",function(){
-					table.dataset_manager.scroll_col_view
-						.call(table.dataset_manager,-1*(dm.view_col_size - dm.view_fix_col_size));
+					table.col_cursor -= table.table_col_size - table.table_fix_col_size;
+					dm.reset_view();
 					table.render({table_render_only:true});
 				})
 				.append("div").attr("class","ctd3_scroll_left_div")
@@ -552,8 +556,8 @@ var ctd3 = function(){
 		if(!(td.select(".ctd3_scroll_right_div")[0][0])){
 			td.style("cursor","pointer")
 				.on("click",function(){
-					table.dataset_manager.scroll_col_view
-						.call(table.dataset_manager,(dm.view_col_size - dm.view_fix_col_size));
+					table.col_cursor += table.table_col_size - table.table_fix_col_size;
+					dm.reset_view();
 					table.render({table_render_only:true});
 				})
 				.append("div").attr("class","ctd3_scroll_right_div")
@@ -580,13 +584,6 @@ var ctd3 = function(){
 			ds_sorted: undefined,
 			ds_view: undefined,
 			meta_view: undefined,
-			// options
-			view_row_cursor: 0,
-			view_col_cursor: 0,
-			view_row_size: 10,
-			view_col_size: 12,
-			view_fix_col_size: 2,
-			show_filter_form: true
 		};
 	};
 	ctd3.DatasetManager.prototype.setup_dataset = function(dataset){
@@ -622,6 +619,9 @@ var ctd3 = function(){
 		for(var i=0,len=this.meta.length;i<len;i++){
 			if(meta.hasOwnProperty(this.meta[i].name)){
 				ctd3.Util.merge(this.meta[i], meta[this.meta[i].name]);
+				if(meta[this.meta[i].name].visualize){
+					this.enable_incell_visualize(i,meta[this.meta[i].name].visualize);
+				}
 			}
 		}
 	};
@@ -634,17 +634,7 @@ var ctd3 = function(){
 			return 0;
 		});
 	};
-	ctd3.DatasetManager.prototype.enable_incell_visualize = function(name,type){
-		var pos;
-		for(var i=0,len=this.meta.length;i<len;i++){
-			if(this.meta[i].name == name){
-				pos = i;
-			}
-		}
-		if(pos === undefined){ return; }
-		
-		if(type === undefined){ type = "bar"; } // default
-		
+	ctd3.DatasetManager.prototype.enable_incell_visualize = function(pos,type){
 		var that = this;
 		var extent = d3.extent(this.dataset, function(d){
 			return d[that.meta[pos].name]; 
@@ -745,10 +735,12 @@ var ctd3 = function(){
 	};
 	ctd3.DatasetManager.prototype.reset_view = function(){
 		var i;
+		var table = this.table;
 		this.ds_view = [];
-		for(i=0;i<this.view_row_size;i++){
-			if(i+this.view_row_cursor < this.ds_sorted.length){
-				this.ds_view.push(this.ds_sorted[i+this.view_row_cursor]);
+
+		for(i=0;i<table.table_row_size;i++){
+			if(i+table.row_cursor < this.ds_sorted.length){
+				this.ds_view.push(this.ds_sorted[i+table.row_cursor]);
 			}else{
 				break;
 			}
@@ -756,91 +748,28 @@ var ctd3 = function(){
 		this.refresh_ds_view_pos();
 		
 		this.meta_view = [];
-		for(i=0;i<this.view_fix_col_size;i++){
+		for(i=0;i<table.table_fix_col_size;i++){
 			this.meta_view.push(this.meta[i]);
 		}
-		for(i=0;i<(this.view_col_size - this.view_fix_col_size);i++){
-			if(i+this.view_col_cursor < this.meta.length){
-				this.meta_view.push(this.meta[i+this.view_col_cursor]);
+		for(i=0;i<(table.table_col_size - table.table_fix_col_size);i++){
+			if(i+this.table.col_cursor < this.meta.length){
+				this.meta_view.push(this.meta[i+this.table.col_cursor]);
 			}
 		}
 		this.refresh_meta_view_pos();
 	};
 	ctd3.DatasetManager.prototype.can_scroll_up = function(){
-		return (this.view_row_cursor > 0)? true : false;
+		return (this.table.row_cursor > 0)? true : false;
 	};
 	ctd3.DatasetManager.prototype.can_scroll_down = function(){
-		return (this.view_row_cursor + this.ds_view.length < this.ds_sorted.length)? true : false;
-	};
-	ctd3.DatasetManager.prototype.scroll_row_view = function(direction){
-		var i;
-		var row_size = this.ds_view.length;
-		var ds_size = this.ds_sorted.length;
-		if(direction>0){
-			for(i=0;i<direction;i++){
-				if(this.view_row_cursor + row_size < ds_size){
-					this.ds_view.shift();
-					this.view_row_cursor++;
-					this.ds_view.push(this.ds_sorted[this.view_row_cursor+row_size-1]);
-				}else{
-					break;
-				}
-			}
-		}else if(direction<0){
-			direction = Math.abs(direction);
-			for(i=0;i<direction;i++){
-				if(this.view_row_cursor > 0){
-					this.ds_view.pop();
-					this.view_row_cursor--;
-					this.ds_view.unshift(this.ds_sorted[this.view_row_cursor]);
-				}else{
-					break;
-				}
-			}
-		}
-		this.refresh_ds_view_pos();
+		return (this.table.row_cursor + this.ds_view.length < this.ds_sorted.length)? true : false;
 	};
 	ctd3.DatasetManager.prototype.can_scroll_left = function(){
-		return (this.view_col_cursor - this.view_fix_col_size > 0)? true : false;
+		return (this.table.col_cursor - this.table.table_fix_col_size > 0)? true : false;
 	};
 	ctd3.DatasetManager.prototype.can_scroll_right = function(){
-		return (this.view_col_cursor + (this.view_col_size - this.view_fix_col_size) < 
+		return (this.table.col_cursor + (this.table.table_col_size - this.table.table_fix_col_size) < 
 					this.meta.length)? true : false;
-	};
-	ctd3.DatasetManager.prototype.scroll_col_view = function(direction){
-		var i;
-		var meta_size = this.meta.length;
-		var meta_tmp = [];
-		for(i=0;i<this.view_fix_col_size;i++){
-			meta_tmp.push(this.meta_view.shift());
-		}
-		var col_size = this.meta_view.length;
-		if(direction>0){
-			for(i=0;i<direction;i++){
-				if(this.view_col_cursor + col_size < meta_size){
-					this.meta_view.shift();
-					this.view_col_cursor++;
-					this.meta_view.push(this.meta[this.view_col_cursor+col_size-1]);
-				}else{
-					break;
-				}
-			}
-		}else if(direction<0){
-			direction = Math.abs(direction);
-			for(i=0;i<direction;i++){
-				if(this.view_col_cursor - this.view_fix_col_size > 0){
-					this.meta_view.pop();
-					this.view_col_cursor--;
-					this.meta_view.unshift(this.meta[this.view_col_cursor]);
-				}else{
-					break;
-				}
-			}
-		}
-		for(i=0;i<this.view_fix_col_size;i++){
-			this.meta_view.unshift(meta_tmp.pop());
-		}
-		this.refresh_meta_view_pos();
 	};
 	ctd3.DatasetManager.prototype.refresh_ds_view_pos = function(){
 		for(var i=0,len=this.ds_view.length;i<len;i++){

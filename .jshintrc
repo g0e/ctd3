@@ -1,0 +1,10 @@
+// http://www.jshint.com/docs/options/
+{
+	"strict" : true,
+	"bitwise": true,
+	"undef": true,
+	"freeze": true,
+	"noarg": true,
+	"unused": true
+}
+

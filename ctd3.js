@@ -10,6 +10,7 @@ http://opensource.org/licenses/mit-license.php
 // for JSHint
 /* global d3 */
 /* exported ctd3 */
+/* jshint loopfunc: true */
 
 /* ================================================================== */
 /*  ctd3 definition                                                   */
@@ -53,6 +54,7 @@ var ctd3 = function(){
 		this.dataset = {};
 		this.meta = [];
 		
+		this.loader = new ctd3.DatasetLoader(this);
 		this.init_dataset(dataset);
 	};
 	ctd3.Table.prototype.init_dataset = function(dataset){
@@ -60,8 +62,8 @@ var ctd3 = function(){
 			this.dataset_manager = new ctd3.DatasetManager(this,this.dataset_manager);
 			this.dm = this.dataset_manager; // alias for dataset_manager
 		}
-		this.dataset = this.dataset_manager.setup_dataset(dataset); // alias for dataset_manager.dataset
-		this.meta = this.dataset_manager.create_default_meta(); // alias for dataset_manager.meta
+		this.dataset = this.dataset_manager.setup_dataset(dataset);
+		this.meta = this.dataset_manager.create_default_meta();
 		this.dm.view_col_cursor = this.dm.view_fix_col_size;
 	};
 	ctd3.Table.prototype.setup_meta = function(meta){
@@ -76,7 +78,7 @@ var ctd3 = function(){
 		if(!(this.tag_table instanceof ctd3.Parts.TagTable)){
 			this.tag_table = new ctd3.Parts.TagTable(this,this.tag_table);
 		}
-		if(cond == undefined){ cond = {}; }
+		if(cond === undefined){ cond = {}; }
 		if(!(cond.table_render_only)){
 			//this.dataset_manager.sort_meta();
 			if(!(cond.skip_filter_dataset)){
@@ -141,6 +143,32 @@ var ctd3 = function(){
 				.append("div").attr("class","ctd3_tag_table");
 			this.tag_table = this.div.append("table");
 			
+			/*
+			// http://help.dottoro.com/ljqeknfl.php
+			var mousewheel_func = function(event){
+				var rolled = 0;
+				if ('wheelDelta' in event) {
+					rolled = event.wheelDelta;
+				}
+				else {  // Firefox
+					// The measurement units of the detail and wheelDelta properties are different.
+					rolled = -40 * event.detail;
+				}
+				if(rolled > 0){
+					dm.scroll_row_view.call(dm,-1);
+					that.table.render({table_render_only:true});
+				}else if(rolled < 0){
+					dm.scroll_row_view.call(dm,1);
+					that.table.render({table_render_only:true});
+				}
+				event.preventDefault();
+				event.returnValue = false;
+				return false;
+			};
+			this.tag_table[0][0].addEventListener("mousewheel", mousewheel_func, false);
+			this.tag_table[0][0].addEventListener("DOMMouseScroll", mousewheel_func, false);
+			*/
+
 			// thead
 			this.tag_thead = this.tag_table.append("thead");
 			this.tag_thead_tr_label = this.tag_thead.append("tr");
@@ -205,7 +233,7 @@ var ctd3 = function(){
 		th.enter().append("th")
 			.each(function(d){
 				d3.select(this)
-					.attr("class",function(d){ return "ctd3_th_label ctd3_th_"+d.name })
+					.attr("class",function(d){ return "ctd3_th_label ctd3_th_"+d.name; })
 					.attr("style","cursor:pointer;")
 					.on("click",function(meta){
 						var dm = that.table.dataset_manager;
@@ -261,13 +289,13 @@ var ctd3 = function(){
 		/********** thead filter **********/
 		if(dm.show_filter_form){
 			// data join
-			var th = this.tag_thead_tr_filter.selectAll("th.ctd3_th_filter").data(meta,function(d){ return d.name; });
+			th = this.tag_thead_tr_filter.selectAll("th.ctd3_th_filter").data(meta,function(d){ return d.name; });
 			
 			// enter
 			th.enter().append("th")
 				.each(function(d){
 					var td = d3.select(this);
-					var div = td.attr("class",function(d){ return "ctd3_th_filter ctd3_th_"+d.name })
+					var div = td.attr("class",function(d){ return "ctd3_th_filter ctd3_th_"+d.name; })
 						.append("div")
 						.attr("class",function(){
 							return (d.name.substring(0,2) == "__")? null:"ctd3_cell_div";
@@ -400,8 +428,8 @@ var ctd3 = function(){
 		});
 		
 		/********** tbody.tr.td for empty dataset **********/
-		if(dataset.length == 0){
-			if(this.tag_tbody.select("tr.ctd3_tr_empty_dataset")[0][0] == null){
+		if(dataset.length === 0){
+			if(this.tag_tbody.select("tr.ctd3_tr_empty_dataset")[0][0] === null){
 				this.tag_tbody
 					.append("tr").attr("class","ctd3_tr_empty_dataset")
 					.append("td").attr("colspan",meta.length)
@@ -425,7 +453,7 @@ var ctd3 = function(){
 						html += " / ";
 						html += "overall=" + dm.dataset.length;
 						return html;
-					})
+					});
 			});
 
 	};
@@ -437,7 +465,7 @@ var ctd3 = function(){
 		if(meta.filter_type == "text"){
 			div.html(function(){
 					var value = (meta.filter_value !== undefined)? "value='"+meta.filter_value+"'" : "";
-					var html = "<input type='text' name='"+meta.name+"' "+value+" />"
+					var html = "<input type='text' name='"+meta.name+"' "+value+" />";
 					return html;
 				})
 				.select("input")
@@ -566,7 +594,7 @@ var ctd3 = function(){
 			this.dataset = ctd3.Util.copy(dataset);
 		}
 		for(var i=0,len=this.dataset.length;i<len;i++){
-			this.dataset[i]["__id"] = i; // set unique id
+			this.dataset[i].__id = i; // set unique id
 		}
 		return this.dataset;
 	};
@@ -575,11 +603,11 @@ var ctd3 = function(){
 		var sample = this.dataset[0];
 		var text_format,css_class;
 		for(var key in sample){
-			if(sample.hasOwnProperty(key) && !(key.substring(0,2) == "__")){
+			if(sample.hasOwnProperty(key) && key.substring(0,2) !== "__"){
 				css_class = [];
 				if(typeof sample[key] == "number"){
 					text_format = d3.format(",");
-					css_class.push("text_align_right")
+					css_class.push("text_align_right");
 				}else{
 					text_format = undefined;
 				}
@@ -615,7 +643,7 @@ var ctd3 = function(){
 		}
 		if(pos === undefined){ return; }
 		
-		if(type === undefined){ type = "bar"; }; // default
+		if(type === undefined){ type = "bar"; } // default
 		
 		var that = this;
 		var extent = d3.extent(this.dataset, function(d){
@@ -648,16 +676,16 @@ var ctd3 = function(){
 					cond.push(function(d){
 						var values = this.filter_value.split(" ");
 						for(var j=0;j<values.length;j++){
-							if(values[j].indexOf("<=") == 0 || values[j].indexOf("=<") == 0){
-								if(!(1.0*d[this.name] <= 1.0*values[j].replace("<","").replace("=",""))){ return false; }
-							}else if(values[j].indexOf(">=") == 0 || values[j].indexOf("=>") == 0){
-								if(!(1.0*d[this.name] >= 1.0*values[j].replace(">","").replace("=",""))){ return false; }
-							}else if(values[j].indexOf("<") == 0){
-								if(!(1.0*d[this.name] < 1.0*values[j].replace("<",""))){ return false; }
-							}else if(values[j].indexOf(">") == 0){
-								if(!(1.0*d[this.name] > 1.0*values[j].replace(">",""))){ return false; }
-							}else if(values[j].indexOf("=") == 0){
-								if(!(""+d[this.name] == values[j].replace("=",""))){ return false; }
+							if(values[j].indexOf("<=") === 0 || values[j].indexOf("=<") === 0){
+								if(1.0*d[this.name] > 1.0*values[j].replace("<","").replace("=","")){ return false; }
+							}else if(values[j].indexOf(">=") === 0 || values[j].indexOf("=>") === 0){
+								if(1.0*d[this.name] < 1.0*values[j].replace(">","").replace("=","")){ return false; }
+							}else if(values[j].indexOf("<") === 0){
+								if(1.0*d[this.name] >= 1.0*values[j].replace("<","")){ return false; }
+							}else if(values[j].indexOf(">") === 0){
+								if(1.0*d[this.name] <= 1.0*values[j].replace(">","")){ return false; }
+							}else if(values[j].indexOf("=") === 0){
+								if(""+d[this.name] !== values[j].replace("=","")){ return false; }
 							}else{
 								if((""+d[this.name]).indexOf(""+values[j]) == -1){ return false; }
 							}
@@ -816,13 +844,63 @@ var ctd3 = function(){
 	};
 	ctd3.DatasetManager.prototype.refresh_ds_view_pos = function(){
 		for(var i=0,len=this.ds_view.length;i<len;i++){
-			this.ds_view[i]["__pos"] = i;
+			this.ds_view[i].__pos = i;
 		}
 	};
 	ctd3.DatasetManager.prototype.refresh_meta_view_pos = function(){
 		for(var i=0,len=this.meta_view.length;i<len;i++){
-			this.meta_view[i]["__pos"] = i;
+			this.meta_view[i].__pos = i;
 		}
+	};
+	
+	/* ------------------------------------------------------------------ */
+	/*  ctd3.DatasetLoader                                                */
+	/* ------------------------------------------------------------------ */
+
+	ctd3.DatasetLoader = function(table){
+		this.table = table;
+		this.base_url = undefined;
+		this.url_params = {};
+		this.dataset_filter = undefined;
+	};
+	ctd3.DatasetLoader.prototype.xhr_load = function(params){
+		/*
+		if(!(this.table.overlay_loading instanceof ctd3.Parts.OverlayLoading)){
+			this.table.overlay_loading = new ctd3.Parts.OverlayLoading(this.table,{});
+		}
+		this.table.overlay_loading.render(true);
+		*/
+		var url = this.setup_url(params,this.base_url);
+		d3.json(url,function(dataset){
+			if(this.dataset_filter){
+				dataset = this.dataset_filter.apply(this,[dataset]);
+			}
+			this.table.setup_dataset(dataset);
+			this.table.render();
+			//this.table.overlay_loading.render(false);
+		}.bind(this));
+	};
+	ctd3.DatasetLoader.prototype.setup_url = function(params,url){
+		if(!url){ url = this.base_url; }
+		params = ctd3.Util.merge(this.url_params, params);
+		var params_str = "";
+		var urls = url.split("?");
+		var base_params_ar,base_params = {},param;
+		if(urls[1]){
+			base_params_ar = urls[1].split("&");
+			for(var i=0;i<base_params_ar.length;i++){
+				param = base_params_ar[i].split("=");
+				base_params[param[0]] = param[1];
+			}
+		}
+		ctd3.Util.merge(base_params,params);
+		for(var key in base_params){
+			if(base_params.hasOwnProperty(key) && base_params[key] !== null){
+				if(params_str!==""){ params_str += "&"; }
+				params_str += key + "=" + base_params[key];
+			}
+		}
+		return urls[0] + "?" + params_str;
 	};
 
 	/* ------------------------------------------------------------------ */

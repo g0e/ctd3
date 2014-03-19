@@ -1,6 +1,6 @@
 .ctd3{
 	font-size:10px;
-	font-family:'Lucida Grande','Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+	/* font-family:'Lucida Grande','Hiragino Kaku Gothic ProN', Meiryo, sans-serif; */
 }
 
 .ctd3 table{
@@ -25,13 +25,22 @@
 	border-right: lightgray solid 1px;
 }
 
-.ctd3 table th{
-	background-color:#eeeeee;
+.ctd3 table thead th{
+	background-color:#eee;
 }
+.ctd3 table tfoot th{
+	background-color:#eee;
+}
+
+/*
+.ctd3 table tbody tr:nth-child(even){
+	background-color:#eee;
+}
+*/
 
 /* contents box */
 div.ctd3_cell_div{
-	height: 1.3em;
+	height: 1.5em;
 	width: 6em; /* default */
 	white-space: nowrap;
 	overflow: hidden;
@@ -39,24 +48,24 @@ div.ctd3_cell_div{
 	margin: 5px;
 	box-sizing:border-box;
 }
-div.ctd3_cell_div > input{
+div.ctd3_cell_div > input,
+div.ctd3_cell_div > select{
 	width: 100%;
 	height: 100%;
 	box-sizing:border-box;
 }
-/*
 tr.ctd3_tr_data:hover div.ctd3_cell_div{
 	white-space: normal;
 	overflow: visible;
 	height: auto;
 }
-*/
+
 .ctd3 table tr:hover.ctd3_tr_data{
-	background-color:#eeeeee;
+	background-color:lightyellow;
 }
 
 .ctd3_tfoot_div{
-	height: 1.3em;
+	height: 1.5em;
 	font-size: small;
 	margin: 5px;
 }
@@ -69,7 +78,7 @@ tr.ctd3_tr_data:hover div.ctd3_cell_div{
 }
 
 div.ctd3_div_empty_dataset{
-	height: 1.3em;
+	height: 1.5em;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -98,7 +107,7 @@ div.ctd3_scroll_up_div,
 div.ctd3_scroll_down_div{
 	padding: 5px;
 	text-align: center;
-	height: 1.3em;
+	height: 1.5em;
 }
 .ctd3 table tbody.ctd3_tbody_scroll_up td:hover,
 .ctd3 table tbody.ctd3_tbody_scroll_down td:hover{

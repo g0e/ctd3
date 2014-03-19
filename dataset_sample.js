@@ -34,7 +34,7 @@ var ctd3t = function(){
 		this.dataset = [];
 		
 		for(var i=0;i<this.row_cnt;i++){
-			var row = {}
+			var row = {};
 			for(var j=0;j<this.cols.length;j++){
 				var pos = { row_pos:i, col_pos:this.cols[j].name };
 				row[this.cols[j].name] = this.cols[j].data_func.call(this,pos);
@@ -77,7 +77,6 @@ var ctd3t = function(){
 	};
 	ctd3t.sequence_str = function(pos){
 		return d3.format("0"+this.numeric_str_len+"d")(pos.row_pos);
-				this.dataset[i].values.push(value);
 	};
 	
 	/**/

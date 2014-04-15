@@ -44,20 +44,20 @@ describe("create fruit-table", function(){
 				table_row_size: 5, table_col_size:4, table_fix_col_size:2 };
 			create_table_simple(dataset.fruit,{},options);
 			
-			options = { caption:"incell visualization" };
-			meta = { price:{ visualize:"bar" }, profit:{ visualize:"gradation" } };
+			options = { caption:"incell visualization & sorting" };
+			meta = { price:{ visualize:"bar", sort:"desc" }, profit:{ visualize:"gradation", visualize_high_color:"white" }, stock:{ visualize:"bar",visualize_bar_color:"orange" } };
 			create_table_simple(dataset.fruit,meta,options);
 			
 			options = { caption:"filter values" };
-			meta = { price:{ filter_value:">=500" }, color:{ filter_type:"select" } };
+			meta = { price:{ filter_value:">99 <=500" }, color:{ filter_type:"select" } };
 			create_table_simple(dataset.fruit,meta,options);
 			
 			var ds = ctd3.Util.copy(dataset.fruit);
 			for(var i=0;i<ds.length;i++){
-				ds[i].memo = "test long field here. hogehoge piyopiyo. foo bar.";
+				ds[i].memo = "test long field here. hogehoge piyopiyo. foo bar. <span style='red'>red text</span>";
 			}
-			options = { caption:"with long field" };
-			meta = { memo:{ width:300 } };
+			options = { caption:"tooltip & text_format test" };
+			meta = { memo:{ width:200, show_tooltip:true }, profit:{ text_format:d3.format("%"), label:"Profit Rate" } };
 			create_table_simple(ds,meta,options);
 
 		}).not.toThrow();

@@ -1,0 +1,74 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=8;IE=9"/>
+		<title>Test ctd3</title>
+		<link rel="stylesheet" href="./../ctd3.css" type="text/css" />
+		<script type="text/javascript" src="./../vendor/d3.v3/d3.v3.js"></script>
+		<script type="text/javascript" src="./../ctd3.js"></script>
+		<script type="text/javascript" src="./../dataset_sample.js"></script>
+		<script type="text/javascript" src="./dataset.json"></script>
+		<script type="text/javascript">
+<!--
+window.onload = function(){
+	(function(){
+		var div_id = "table1";
+		var row_size = 10000;
+		var col_size = 45;
+
+		var cond = {
+			row_cnt: row_size,
+			random_ceil: 20000,
+			random_str_len: 5,
+			cols:[
+				{name:"id", data_func: ctd3t.sequence_int}
+			]
+		};
+		for(var i=1;i<=col_size;i++){
+			if(i%3 == 1){
+				cond.cols.push({name:"col"+i, data_func:ctd3t.random_int});
+			}else if(i%3 == 2){
+				cond.cols.push({name:"col"+i, data_func:ctd3t.random_str});
+			}else{
+				cond.cols.push({name:"col"+i, data_func:ctd3t.random_weekday});
+			}
+		}
+		var data = (new ctd3t.DatasetGenerator(cond)).generate();
+		d3.select("#tables").append("div").attr("id",div_id).style("margin","20px");
+		var t = new ctd3.Table(div_id,data);
+		var meta = {
+			id:{ order:0, width:50 },
+		};
+		for(var i=1;i<=col_size;i++){
+			meta["col"+i] = { order:i };
+			if(i%3 == 1){
+				meta["col"+i].visualize = "bar";
+			}else if(i%3 == 2){
+			}else{
+				meta["col"+i].filter_type = "select";
+			}
+		}
+		t.setup_meta(meta);
+		var options = {
+			caption: "Big Table(" + row_size + "x" + col_size + ")",
+			table_fix_col_size:1,
+			table_col_size:11,
+			table_row_size:15
+		};
+		t.setup_options(options);
+
+		t.render();
+	})();
+};
+-->
+		</script>
+	</head>
+	<body>
+		<h1>ctd3 sample tables</h1>
+		<ul>
+			<li><a href="./index.html">back to index</a></li>
+		</ul>
+		<div id="tables">
+		</div>
+	</body>
+</html>

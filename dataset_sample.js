@@ -64,7 +64,11 @@ var ctd3t = function(){
 		}
 		return str;
 	};
-	
+	ctd3t.random_weekday = function(){
+		var wd = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+		return wd[Math.floor(Math.random()*wd.length)];
+	};
+
 	/* sequence_basic */
 	ctd3t.sequence_int = function(pos){
 		return parseInt(pos.row_pos*this.seq_step + this.seq_start);

@@ -19,7 +19,7 @@ var ctd3 = function(){
 	"use strict";
 	
 	var ctd3 = {
-		version: "0.0.0"
+		version: "0.1.0"
 	};
 	
 	/* ------------------------------------------------------------------ */
@@ -41,13 +41,33 @@ var ctd3 = function(){
 	ctd3.options = {};
 	
 	/* ------------------------------------------------------------------ */
-	/*  ctd3.Table                                                       */
+	/*  ctd3.Table                                                        */
 	/* ------------------------------------------------------------------ */
 	
+	/**
+	meta options
+	- order ... for col sorting
+	- sort ... "asc" or "desc" or null for default row sorting
+	- label ... tr > th text
+	- width ... div width ex:100
+	- text_format ...  function(value, meta) like d3.format("%")
+	- html_format ... function(formatted_text, meta, value)
+	- visualize ... "bar" or "gradation" (in-cell chart)
+	- visualize_bar_color ... ex:"lightblue" for visualize="bar" customize
+	- visualize_low_color ... ex:"green" for visualize="gradation" customize
+	- visualize_high_color ... ex:"red" for visualize="gradation" customize
+	- filter_value ... "hoge"
+	- filter_type ... "select" or "text"
+	- show_tooltip ... true or false(default)
+	*/
+
 	ctd3.Table = function(div_id,dataset){
 		this.div_id = div_id;
+		this.div = d3.select("#"+this.div_id)
+			.style("position","relative"); // for overlay position:absolute
 		ctd3.instances[div_id] = this;
-		
+		this.initialized = false; // executed init_dataset or not
+
 		// place holder
 		this.dataset_manager = {};
 		this.tag_table = {};
@@ -59,13 +79,15 @@ var ctd3 = function(){
 		this.row_cursor = 0;
 		this.col_cursor =  0;
 		this.table_row_size = 10;
-		this.table_col_size = 12;
+		this.table_col_size = 10;
 		this.table_fix_col_size = 0;
 		this.show_filter_form = true;
 		this.show_footer_info = true;
 
 		this.loader = new ctd3.DatasetLoader(this);
-		this.init_dataset(dataset);
+		if(dataset){
+			this.init_dataset(dataset);
+		}
 	};
 	ctd3.Table.prototype.init_dataset = function(dataset){
 		if(!(this.dataset_manager instanceof ctd3.DatasetManager)){
@@ -75,6 +97,7 @@ var ctd3 = function(){
 		this.dataset = this.dataset_manager.setup_dataset(dataset);
 		this.meta = this.dataset_manager.create_default_meta();
 		this.col_cursor = this.table_fix_col_size;
+		this.initialized = true;
 	};
 	ctd3.Table.prototype.setup_meta = function(meta){
 		this.dataset_manager.setup_meta(meta);
@@ -137,8 +160,7 @@ var ctd3 = function(){
 	ctd3.Parts.TagTable = function(){ ctd3.Parts.apply(this,arguments); };
 	ctd3.Parts.TagTable.prototype = new ctd3.Parts();
 	ctd3.Parts.TagTable.prototype.get_defaults = function(){
-		return {
-		};
+		return {};
 	};
 	ctd3.Parts.TagTable.prototype.render = function(){
 		var that = this;
@@ -150,7 +172,7 @@ var ctd3 = function(){
 		/********** initialize **********/
 		if(!(this.div)){
 			// table
-			this.div = d3.select("#"+this.table.div_id).attr("class","ctd3")
+			this.div = this.table.div.attr("class","ctd3")
 				.append("div").attr("class","ctd3_tag_table");
 			this.tag_table = this.div.append("table");
 			
@@ -183,9 +205,15 @@ var ctd3 = function(){
 			scroll_up.enter()
 				.insert("tbody",".ctd3_tbody_data").attr("class","ctd3_tbody_scroll_up")
 				.append("tr")
-				.append("td").attr("colspan",100);
-			// update
-			scroll_up.select("td").call(this.update_scroll_up_td, this.table);
+				.append("td").attr("colspan",table.table_col_size+2)
+				.style("cursor","pointer")
+				.on("click",function(){
+					table.row_cursor -= table.table_row_size;
+					dm.reset_view();
+					table.render({table_render_only:true});
+				})
+				.append("div").attr("class","ctd3_scroll_up_div")
+				.append("span").html("&#9650; previous page");
 		}else{
 			this.tag_table.select(".ctd3_tbody_scroll_up").remove();
 		}
@@ -198,9 +226,15 @@ var ctd3 = function(){
 			scroll_down.enter()
 				.insert("tbody","tfoot").attr("class","ctd3_tbody_scroll_down")
 				.append("tr")
-				.append("td").attr("colspan",100);
-			// update
-			scroll_down.select("td").call(this.update_scroll_down_td, this.table);
+				.append("td").attr("colspan",table.table_col_size+2)
+				.style("cursor","pointer")
+				.on("click",function(){
+					table.row_cursor += table.table_row_size;
+					dm.reset_view();
+					table.render({table_render_only:true});
+				})
+				.append("div").attr("class","ctd3_scroll_down_div")
+				.append("span").html("&#9660; next page ");
 		}else{
 			this.tag_table.select(".ctd3_tbody_scroll_down").remove();
 		}
@@ -249,7 +283,7 @@ var ctd3 = function(){
 						return (d.name.substring(0,2) == "__")? null:"ctd3_cell_div";
 					})
 					.style("width",function(d,j){
-						return (d.width)? d.width : null;
+						return (d.width)? d.width+"px" : null;
 					})
 					;
 			});
@@ -291,7 +325,7 @@ var ctd3 = function(){
 							return (d.name.substring(0,2) == "__")? null:"ctd3_cell_div";
 						})
 						.style("width",function(d,j){
-							return (d.width)? d.width : null;
+							return (d.width)? d.width+"px" : null;
 						});
 					that.create_filter_form(div, d);
 				});
@@ -318,25 +352,36 @@ var ctd3 = function(){
 			td_scroll.enter()
 				.append("td")
 				.attr("class","ctd3_td_scroll")
-					;
+				.each(function(m,i){
+					td = d3.select(this);
+					if(m.name == "__scroll_right"){
+						td.attr("rowspan",100)
+							.attr("class","ctd3_td_scroll ctd3_td_scroll_right")
+							.style("cursor","pointer")
+							.on("click",function(){
+								table.col_cursor += table.table_col_size - table.table_fix_col_size;
+								dm.reset_view();
+								table.render({table_render_only:true});
+							})
+							.append("div").attr("class","ctd3_scroll_right_div")
+							.append("span").html("&#9654;");
+					}else if(m.name == "__scroll_left"){
+						td.attr("rowspan",100)
+							.attr("class","ctd3_td_scroll ctd3_td_scroll_left")
+							.style("cursor","pointer")
+							.on("click",function(){
+								table.col_cursor -= table.table_col_size - table.table_fix_col_size;
+								dm.reset_view();
+								table.render({table_render_only:true});
+							})
+							.append("div").attr("class","ctd3_scroll_left_div")
+							.append("span").html("&#9664;");
+					}else{
+						td.attr("class","ctd3_td_scroll ctd3_td_empty");
+					}
+				});
 			
 			// update
-			td_scroll
-				.each(function(m,i){
-				td = d3.select(this);
-				if(m.name == "__scroll_right"){
-					td.attr("rowspan",100)
-						.call(that.update_scroll_right_td, that.table)
-						.attr("class","ctd3_td_scroll ctd3_td_scroll_right");
-				}else if(m.name == "__scroll_left"){
-					td.attr("rowspan",100)
-						.call(that.update_scroll_left_td, that.table)
-						.attr("class","ctd3_td_scroll ctd3_td_scroll_left");
-				}else{
-					td.attr("class","ctd3_td_scroll ctd3_td_empty");
-				}
-			});
-			
 			td_scroll.sort(function(a,b){ return a.__pos - b.__pos; });
 			
 			// exit
@@ -387,6 +432,9 @@ var ctd3 = function(){
 					if(meta[j].text_format !== undefined){
 						html =  meta[j].text_format(html,meta[j]);
 					}
+					if(meta[j].show_tooltip){
+						html = "<span class='ctd3_tooltip_span'>" + html + "</span>" + html;
+					}
 					if(meta[j].html_format !== undefined){
 						html = meta[j].html_format(html,meta[j],row[d.name]);
 					}else{
@@ -406,7 +454,7 @@ var ctd3 = function(){
 				})
 				.select("div").attr("class","ctd3_cell_div")
 				.style("width",function(d,j){
-					return (meta[j].width)? meta[j].width : null;
+					return (meta[j].width)? meta[j].width+"px" : null;
 				})
 				;
 			
@@ -440,16 +488,15 @@ var ctd3 = function(){
 						.text(function(){
 							var html = "";
 							if(dataset.length > 0){
-								html += "shown=" + (table.row_cursor+1) + "-" + (table.row_cursor + dataset.length);
+								html += "" + (table.row_cursor+1) + "-" + (table.row_cursor + dataset.length);
 							}else{
-								html += "shown=NA";
+								html += "0";
 							}
-							html += " / ";
 							if(dm.ds_sorted.length != dm.dataset.length){
-								html += "filtered=" + dm.ds_sorted.length;
-								html += " / ";
+								html += " / " + dm.ds_sorted.length;
+							}else{
+								html += " / " + dm.dataset.length;
 							}
-							html += "total=" + dm.dataset.length;
 							return html;
 						});
 			});
@@ -512,59 +559,42 @@ var ctd3 = function(){
 				});
 		}
 	};
-	ctd3.Parts.TagTable.prototype.update_scroll_up_td = function(td,table){
-		var dm = table.dataset_manager;
-		if(!(td.select(".ctd3_scroll_up_div")[0][0])){
-			td.style("cursor","pointer")
-				.on("click",function(){
-					table.row_cursor -= table.table_row_size;
-					dm.reset_view();
-					table.render({table_render_only:true});
-				})
-				.append("div").attr("class","ctd3_scroll_up_div")
-				.append("span").html("&#9650; previous page");
-		}
-	};
-	ctd3.Parts.TagTable.prototype.update_scroll_down_td = function(td,table){
-		var dm = table.dataset_manager;
-		if(!(td.select(".ctd3_scroll_down_div")[0][0])){
-			td.style("cursor","pointer")
-				.on("click",function(){
-					table.row_cursor += table.table_row_size;
-					dm.reset_view();
-					table.render({table_render_only:true});
-				})
-				.append("div").attr("class","ctd3_scroll_down_div")
-				.append("span").html("&#9660;next page ");
-		}
-	};
-	ctd3.Parts.TagTable.prototype.update_scroll_left_td = function(td,table){
-		var dm = table.dataset_manager;
-		if(!(td.select(".ctd3_scroll_left_div")[0][0])){
-			td.style("cursor","pointer")
-				.on("click",function(){
-					table.col_cursor -= table.table_col_size - table.table_fix_col_size;
-					dm.reset_view();
-					table.render({table_render_only:true});
-				})
-				.append("div").attr("class","ctd3_scroll_left_div")
-				.append("span").html("&#9664;");
-		}
-	};
-	ctd3.Parts.TagTable.prototype.update_scroll_right_td = function(td,table){
-		var dm = table.dataset_manager;
-		if(!(td.select(".ctd3_scroll_right_div")[0][0])){
-			td.style("cursor","pointer")
-				.on("click",function(){
-					table.col_cursor += table.table_col_size - table.table_fix_col_size;
-					dm.reset_view();
-					table.render({table_render_only:true});
-				})
-				.append("div").attr("class","ctd3_scroll_right_div")
-				.append("span").html("&#9654;");
-		}
-	};
 	
+	/* ------------------------------------------------------------------ */
+	/*  ctd3.Parts.OverlayLoading                                         */
+	/* ------------------------------------------------------------------ */
+
+	ctd3.Parts.OverlayLoading = function(){ ctd3.Parts.apply(this,arguments); };
+	ctd3.Parts.OverlayLoading.prototype = new ctd3.Parts();
+	ctd3.Parts.OverlayLoading.prototype.get_defaults = function(){
+		return {};
+	};
+	ctd3.Parts.OverlayLoading.prototype.render = function(onoff){
+		if(onoff){
+			this.div = this.table.div.append("div").attr("class","ctd3_overlay_loading");
+			this.div.append("div");
+			this.div.append("span").text("Now Loading ... ");
+			if(this.table.tag_table.tag_table){
+				var h = this.table.tag_table.tag_table[0][0].offsetHeight;
+				var w = this.table.tag_table.tag_table[0][0].offsetWidth;
+				this.div.select("div").style("width",w+"px").style("height","100%");
+				this.div.select("span")
+					.style("position","absolute")
+					.style("left",function(){
+						return (w - this.offsetWidth)/2 + "px";
+					})
+					.style("top",function(){
+						return (h - this.offsetHeight)/2 + "px";
+					});
+			}
+		}else{
+			if(this.div){
+				this.div.remove();
+				this.div = undefined;
+			}
+		}
+	};
+
 	/* ------------------------------------------------------------------ */
 	/*  ctd3.DatasetManager                                               */
 	/* ------------------------------------------------------------------ */
@@ -584,6 +614,7 @@ var ctd3 = function(){
 			ds_sorted: undefined,
 			ds_view: undefined,
 			meta_view: undefined,
+			id_seq: 0,
 		};
 	};
 	ctd3.DatasetManager.prototype.setup_dataset = function(dataset){
@@ -591,8 +622,9 @@ var ctd3 = function(){
 			this.dataset = ctd3.Util.copy(dataset);
 		}
 		for(var i=0,len=this.dataset.length;i<len;i++){
-			this.dataset[i].__id = i; // set unique id
+			this.dataset[i].__id = i + this.id_seq; // set unique id
 		}
+		this.id_seq += this.dataset.length;
 		return this.dataset;
 	};
 	ctd3.DatasetManager.prototype.create_default_meta = function(){
@@ -643,10 +675,13 @@ var ctd3 = function(){
 		if(type == "bar"){
 			this.meta[pos].scale = d3.scale.linear().range([0,100]).domain(extent);
 			this.meta[pos].html_format = function(text,meta,val){
-				return "<div style='position:relative;'><div style='background-color:lightblue;position:absolute;z-index:1;height:100%;width:" + meta.scale(val) + "%;'> </div><div style='position:relative;z-index:2;'>" + text + "</div></div>";
+				var color = (meta.visualize_bar_color)? meta.visualize_bar_color : "lightblue";
+				return "<div style='position:relative;'><div style='background-color:"+color+";position:absolute;z-index:1;height:100%;width:" + meta.scale(val) + "%;'> </div><div style='position:relative;z-index:2;'>" + text + "</div></div>";
 			};
 		}else if(type == "gradation"){
-			this.meta[pos].scale = d3.scale.linear().range(["green","red"]).domain(extent)
+			var low_color = (this.meta[pos].visualize_low_color)? this.meta[pos].visualize_low_color : "green";
+			var high_color = (this.meta[pos].visualize_high_color)? this.meta[pos].visualize_high_color : "red";
+			this.meta[pos].scale = d3.scale.linear().range([low_color,high_color]).domain(extent)
 				.interpolate(d3.interpolateHsl);
 			this.meta[pos].html_format = function(text,meta,val){
 				return "<div>" + text + "</div>";
@@ -790,23 +825,36 @@ var ctd3 = function(){
 		this.table = table;
 		this.base_url = undefined;
 		this.url_params = {};
+		this.onload_options = undefined;
+		this.onload_meta = undefined;
 		this.dataset_filter = undefined;
 	};
 	ctd3.DatasetLoader.prototype.xhr_load = function(params){
-		/*
 		if(!(this.table.overlay_loading instanceof ctd3.Parts.OverlayLoading)){
 			this.table.overlay_loading = new ctd3.Parts.OverlayLoading(this.table,{});
 		}
 		this.table.overlay_loading.render(true);
-		*/
+
 		var url = this.setup_url(params,this.base_url);
 		d3.json(url,function(dataset){
+			//console.log(dataset);
 			if(this.dataset_filter){
 				dataset = this.dataset_filter.apply(this,[dataset]);
 			}
-			this.table.setup_dataset(dataset);
+			if(this.table.initialized){
+				this.table.dataset = this.table.dataset_manager.setup_dataset(dataset);
+			}else{
+				this.table.init_dataset(dataset);
+				if(this.onload_meta){
+					this.table.setup_meta(this.onload_meta);
+				}
+				if(this.onload_options){
+					this.table.setup_options(this.onload_options);
+				}
+			}
+			this.table.row_cursor = 0;
 			this.table.render();
-			//this.table.overlay_loading.render(false);
+			this.table.overlay_loading.render(false);
 		}.bind(this));
 	};
 	ctd3.DatasetLoader.prototype.setup_url = function(params,url){

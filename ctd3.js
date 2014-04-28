@@ -828,6 +828,7 @@ var ctd3 = function(){
 		this.onload_options = undefined;
 		this.onload_meta = undefined;
 		this.dataset_filter = undefined;
+		this.after_load_callback = undefined;
 	};
 	ctd3.DatasetLoader.prototype.xhr_load = function(params){
 		if(!(this.table.overlay_loading instanceof ctd3.Parts.OverlayLoading)){
@@ -855,6 +856,9 @@ var ctd3 = function(){
 			this.table.row_cursor = 0;
 			this.table.render();
 			this.table.overlay_loading.render(false);
+			if(this.after_load_callback !== undefined){
+				this.after_load_callback(this.table);
+			}
 		}.bind(this));
 	};
 	ctd3.DatasetLoader.prototype.setup_url = function(params,url){

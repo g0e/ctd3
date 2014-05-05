@@ -148,7 +148,7 @@ var ctd3 = function(){
 			}else if((""+w).slice(-2) == "px"){
 				sum_abs += 1.0 * w.replace("px","");
 			}else if((""+w).slice(-1) == "%"){
-				sum_rel += 1.0 * w.replace("%","");
+				sum_rel += 1.0 * w.replace("%","") / 100.0;
 			}else{
 				sum_rel += w;
 			}
@@ -162,7 +162,7 @@ var ctd3 = function(){
 			}else if((""+w).slice(-2) == "px"){
 				m.width = 1.0 * w.replace("px","");
 			}else if((""+w).slice(-1) == "%"){
-				m.width = 1.0 * w.replace("%","") / sum_rel * width_rel;
+				m.width = 1.0 * w.replace("%","") / 100.0 / sum_rel * width_rel;
 			}else{
 				m.width = 1.0 * w / sum_rel * width_rel;
 			}

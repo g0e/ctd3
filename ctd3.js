@@ -50,6 +50,7 @@ var ctd3 = function(){
 	- sort ... "asc" or "desc" or null for default row sorting
 	- label ... tr > th text
 	- width ... div width ex:100
+	- width2 ... used if auto_resize=true
 	- text_format ...  function(value, meta) like d3.format("%")
 	- html_format ... function(formatted_text, meta, value)
 	- visualize ... "bar" or "gradation" (in-cell chart)
@@ -83,6 +84,8 @@ var ctd3 = function(){
 		this.table_fix_col_size = 0;
 		this.show_filter_form = true;
 		this.show_footer_info = true;
+		this.auto_resize = false;
+		this.width = undefined;
 
 		this.loader = new ctd3.DatasetLoader(this);
 		if(dataset){
@@ -120,7 +123,50 @@ var ctd3 = function(){
 			this.dataset_manager.sort_dataset();
 			this.dataset_manager.reset_view();
 		}
+		if(this.auto_resize){
+			this.resize_calc();
+			/*
+			// TODO
+			var that = this;
+			d3.select(window).on("resize."+this.div_id,function(){
+				that.resize_calc();
+				that.render({ table_render_only:true });
+			});
+			*/
+
+		}
 		this.tag_table.render();
+	};
+	ctd3.Table.prototype.resize_calc = function(){
+		this.width = (d3.select("#"+this.div_id)[0][0].clientWidth || this.width);
+		var i,w,m,sum_rel=0.0,sum_abs=0;
+		for(i=0;i<this.meta.length;i++){
+			m = this.meta[i];
+			w = m.width2;
+			if(!(w)){
+				sum_rel += 1.0;
+			}else if((""+w).slice(-2) == "px"){
+				sum_abs += 1.0 * w.replace("px","");
+			}else if((""+w).slice(-1) == "%"){
+				sum_rel += 1.0 * w.replace("%","");
+			}else{
+				sum_rel += w;
+			}
+		}
+		var width_abs = sum_abs, width_rel = this.width - width_abs;
+		for(i=0;i<this.meta.length;i++){
+			m = this.meta[i];
+			w = m.width2;
+			if(!(w)){
+				m.width = 1.0 / sum_rel * width_rel;
+			}else if((""+w).slice(-2) == "px"){
+				m.width = 1.0 * w.replace("px","");
+			}else if((""+w).slice(-1) == "%"){
+				m.width = 1.0 * w.replace("%","") / sum_rel * width_rel;
+			}else{
+				m.width = 1.0 * w / sum_rel * width_rel;
+			}
+		}
 	};
 
 	/* ------------------------------------------------------------------ */

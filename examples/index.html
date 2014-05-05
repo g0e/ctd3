@@ -22,17 +22,19 @@ window.onload = function(){
 		d3.select("#tables").append("div").attr("id",div_id).style("margin","20px");
 		var t = new ctd3.Table(div_id,dataset.fruit);
 		var meta = {
-			price:{ visualize:"bar" },
+			price:{ visualize:"bar", width2:"100px" },
 			profit:{ 
 				text_format: d3.format("%"),
-				visualize:"gradation", visualize_high_color:"green", visualize_low_color:"white" 
+				visualize:"gradation", visualize_high_color:"green", visualize_low_color:"white",
+				width2: "200px",
 			},
-			stock:{ visualize:"bar",visualize_bar_color:"orange" },
+			stock:{ visualize:"bar",visualize_bar_color:"orange",width2: 2.0 },
 			color:{ filter_type:"select" },
 		};
 		t.setup_meta(meta);
 		var options = {
 			caption: "customized table",
+			auto_resize: true,
 		};
 		t.setup_options(options);
 		t.render();
@@ -48,7 +50,7 @@ window.onload = function(){
 			<li><a href="./big_table.html">big table</a></li>
 			<li><a href="./ajax_load.html">ajax load</a></li>
 		</ul>
-		<div id="tables">
+		<div id="tables" style="width:90%;">
 		</div>
 	</body>
 </html>

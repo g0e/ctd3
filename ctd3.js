@@ -259,7 +259,9 @@ var ctd3 = function(){
 					table.render({table_render_only:true});
 				})
 				.append("div").attr("class","ctd3_scroll_up_div")
-				.append("span").html("&#9650; previous page");
+				.append("span").html(function(){
+					return "&#9650; 前の"+dm.can_scroll_up(table.table_row_size)+"件を表示";
+				});
 		}else{
 			this.tag_table.select(".ctd3_tbody_scroll_up").remove();
 		}
@@ -280,7 +282,9 @@ var ctd3 = function(){
 					table.render({table_render_only:true});
 				})
 				.append("div").attr("class","ctd3_scroll_down_div")
-				.append("span").html("&#9660; next page ");
+				.append("span").html(function(){
+					return "&#9660; 次の"+dm.can_scroll_down(table.table_row_size)+"件を表示";
+				});
 		}else{
 			this.tag_table.select(".ctd3_tbody_scroll_down").remove();
 		}
@@ -839,18 +843,34 @@ var ctd3 = function(){
 		}
 		this.refresh_meta_view_pos();
 	};
-	ctd3.DatasetManager.prototype.can_scroll_up = function(){
-		return (this.table.row_cursor > 0)? true : false;
+	ctd3.DatasetManager.prototype.can_scroll_up = function(page_size){
+		if(page_size === undefined){
+			return (this.table.row_cursor > 0)? true : false;
+		}else{
+			return Math.min(this.table.row_cursor, page_size);
+		}
 	};
-	ctd3.DatasetManager.prototype.can_scroll_down = function(){
-		return (this.table.row_cursor + this.ds_view.length < this.ds_sorted.length)? true : false;
+	ctd3.DatasetManager.prototype.can_scroll_down = function(page_size){
+		if(page_size === undefined){
+			return (this.table.row_cursor + this.ds_view.length < this.ds_sorted.length)? true : false;
+		}else{
+			return Math.min(this.ds_sorted.length - this.ds_view.length - this.table.row_cursor, page_size);
+		}
 	};
-	ctd3.DatasetManager.prototype.can_scroll_left = function(){
-		return (this.table.col_cursor - this.table.table_fix_col_size > 0)? true : false;
+	ctd3.DatasetManager.prototype.can_scroll_left = function(page_size){
+		if(page_size === undefined){
+			return (this.table.col_cursor - this.table.table_fix_col_size > 0)? true : false;
+		}else{
+			return Math.min(this.table.col_cursor - this.table.table_fix_col_size, page_size);
+		}
 	};
-	ctd3.DatasetManager.prototype.can_scroll_right = function(){
-		return (this.table.col_cursor + (this.table.table_col_size - this.table.table_fix_col_size) < 
+	ctd3.DatasetManager.prototype.can_scroll_right = function(page_size){
+		if(page_size === undefined){
+			return (this.table.col_cursor + (this.table.table_col_size - this.table.table_fix_col_size) < 
 					this.meta.length)? true : false;
+		}else{
+			return Math.min(this.meta.length - this.table.col_cursor - (this.table.table_col_size - this.table.table_fix_col_size), page_size);
+		}
 	};
 	ctd3.DatasetManager.prototype.refresh_ds_view_pos = function(){
 		for(var i=0,len=this.ds_view.length;i<len;i++){

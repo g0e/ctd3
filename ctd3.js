@@ -58,7 +58,7 @@ var ctd3 = function(){
 	- visualize_low_color ... ex:"green" for visualize="gradation" customize
 	- visualize_high_color ... ex:"red" for visualize="gradation" customize
 	- filter_value ... "hoge"
-	- filter_type ... "select" or "text"
+	- filter_type ... "select" or "text" or "number"
 	- show_tooltip ... true or false(default)
 	*/
 
@@ -561,7 +561,7 @@ var ctd3 = function(){
 		var dm = this.table.dataset_manager;
 		
 		if(meta.name.substring(0,2) == "__"){ return; }
-		if(meta.filter_type == "text"){
+		if(meta.filter_type == "text" || meta.filter_type == "number"){
 			div.html(function(){
 					var value = (meta.filter_value !== undefined)? "value='"+meta.filter_value+"'" : "";
 					var html = "<input type='text' name='"+meta.name+"' "+value+" />";
@@ -747,7 +747,7 @@ var ctd3 = function(){
 		for(i=0;i<this.meta.length;i++){
 			if(this.meta[i].filter_value !== undefined){
 				meta = this.meta[i];
-				if(meta.filter_type == "text" && meta.filter_value !== undefined){
+				if((meta.filter_type == "text" || meta.filter_type == "number") && meta.filter_value !== undefined){
 					cond.push(function(d){
 						var values = this.filter_value.split(" ");
 						for(var j=0;j<values.length;j++){
@@ -759,7 +759,7 @@ var ctd3 = function(){
 								if(1.0*d[this.name] >= 1.0*values[j].replace("<","")){ return false; }
 							}else if(values[j].indexOf(">") === 0){
 								if(1.0*d[this.name] <= 1.0*values[j].replace(">","")){ return false; }
-							}else if(values[j].indexOf("=") === 0){
+							}else if(values[j].indexOf("=") === 0 || meta.filter_type == "number"){
 								if(""+d[this.name] !== values[j].replace("=","")){ return false; }
 							}else{
 								if((""+d[this.name]).indexOf(""+values[j]) == -1){ return false; }

@@ -51,8 +51,8 @@ var ctd3 = function(){
 	- label ... tr > th text
 	- width ... div width ex:100
 	- width2 ... used if auto_resize=true
-	- text_format ...  function(value, meta) like d3.format("%")
-	- html_format ... function(formatted_text, meta, value)
+	- text_format ...  function(value, meta, row) like d3.format("%")
+	- html_format ... function(formatted_text, meta, value, row)
 	- visualize ... "bar" or "gradation" (in-cell chart)
 	- visualize_bar_color ... ex:"lightblue" for visualize="bar" customize
 	- visualize_low_color ... ex:"green" for visualize="gradation" customize
@@ -480,13 +480,13 @@ var ctd3 = function(){
 				.html(function(d,j){
 					var html = row[d.name];
 					if(meta[j].text_format !== undefined){
-						html =  meta[j].text_format(html,meta[j]);
+						html =  meta[j].text_format(html,meta[j],row);
 					}
 					if(meta[j].show_tooltip){
 						html = "<span class='ctd3_tooltip_span'>" + html + "</span>" + html;
 					}
 					if(meta[j].html_format !== undefined){
-						html = meta[j].html_format(html,meta[j],row[d.name]);
+						html = meta[j].html_format(html,meta[j],row[d.name],row);
 					}else{
 						html = "<div>" + html + "</div>";
 					}

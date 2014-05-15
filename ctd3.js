@@ -638,10 +638,7 @@ var ctd3 = function(){
 					});
 			}
 		}else{
-			if(this.div){
-				this.div.remove();
-				this.div = undefined;
-			}
+			this.table.div.selectAll(".ctd3_overlay_loading").remove();
 		}
 	};
 

@@ -53,6 +53,7 @@ var ctd3 = function(){
 	- width2 ... used if auto_resize=true
 	- text_format ...  function(value, meta, row) like d3.format("%")
 	- html_format ... function(formatted_text, meta, value, row)
+	- js_format ... function() called after cell-div creation
 	- visualize ... "bar" or "gradation" (in-cell chart)
 	- visualize_bar_color ... ex:"lightblue" for visualize="bar" customize
 	- visualize_low_color ... ex:"green" for visualize="gradation" customize
@@ -492,6 +493,12 @@ var ctd3 = function(){
 					}
 					return html;
 				})
+				.each(function(m,j){
+					if(meta[j].js_format !== undefined){
+						var d = d3.select(this.parentNode.parentNode).datum();
+						meta[j].js_format.bind(this)(m,d,i,j);
+					}
+				})
 				.attr("class",function(d,j){
 					var class_str = (meta[j].css_class)? meta[j].css_class.join(" ") : "";
 					return "ctd3_td_data " + ("ctd3_td_"+d.name) + " " + class_str;
@@ -879,7 +886,20 @@ var ctd3 = function(){
 			this.meta_view[i].__pos = i;
 		}
 	};
-	
+	ctd3.DatasetManager.prototype.select = function(where_func,select_func){
+		var d=this.dataset, r=[];
+		for(var i=0;i<d.length;i++){
+			if(where_func(d[i])){
+				if(select_func === undefined){
+					r.push(d[i]);
+				}else{
+					r.push(select_func(d[i]));
+				}
+			}
+		}
+		return r;
+	};
+
 	/* ------------------------------------------------------------------ */
 	/*  ctd3.DatasetLoader                                                */
 	/* ------------------------------------------------------------------ */

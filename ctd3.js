@@ -754,26 +754,34 @@ var ctd3 = function(){
 				if((meta.filter_type == "text" || meta.filter_type == "number") && meta.filter_value !== undefined){
 					cond.push(function(d){
 						var values = this.filter_value.split(" ");
+						var data = d[this.name];
+						if(typeof(data) === "object" && data.__search_value){
+							data = data.__search_value;
+						}
 						for(var j=0;j<values.length;j++){
 							if(values[j].indexOf("<=") === 0 || values[j].indexOf("=<") === 0){
-								if(1.0*d[this.name] > 1.0*values[j].replace("<","").replace("=","")){ return false; }
+								if(1.0*data > 1.0*values[j].replace("<","").replace("=","")){ return false; }
 							}else if(values[j].indexOf(">=") === 0 || values[j].indexOf("=>") === 0){
-								if(1.0*d[this.name] < 1.0*values[j].replace(">","").replace("=","")){ return false; }
+								if(1.0*data < 1.0*values[j].replace(">","").replace("=","")){ return false; }
 							}else if(values[j].indexOf("<") === 0){
-								if(1.0*d[this.name] >= 1.0*values[j].replace("<","")){ return false; }
+								if(1.0*data >= 1.0*values[j].replace("<","")){ return false; }
 							}else if(values[j].indexOf(">") === 0){
-								if(1.0*d[this.name] <= 1.0*values[j].replace(">","")){ return false; }
+								if(1.0*data <= 1.0*values[j].replace(">","")){ return false; }
 							}else if(values[j].indexOf("=") === 0 || meta.filter_type == "number"){
-								if(""+d[this.name] !== values[j].replace("=","")){ return false; }
+								if(""+data !== values[j].replace("=","")){ return false; }
 							}else{
-								if((""+d[this.name]).indexOf(""+values[j]) == -1){ return false; }
+								if((""+data).indexOf(""+values[j]) == -1){ return false; }
 							}
 						}
 						return true;
 					}.bind(meta));
 				}else if(meta.filter_type == "select" && meta.filter_value !== undefined){
 					cond.push(function(d){
-						return (""+d[this.name] == ""+this.filter_value);
+						var data = d[this.name];
+						if(typeof(data) === "object" && data.__search_value){
+							data = data.__search_value;
+						}
+						return (""+data == ""+this.filter_value);
 					}.bind(meta));
 
 				}

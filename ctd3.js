@@ -87,6 +87,7 @@ var ctd3 = function(){
 		this.show_footer_info = true;
 		this.auto_resize = false;
 		this.width = undefined;
+		this.col_fix_size = 13;
 
 		this.loader = new ctd3.DatasetLoader(this);
 		if(dataset){
@@ -154,6 +155,7 @@ var ctd3 = function(){
 				sum_rel += w;
 			}
 		}
+		sum_abs += this.col_fix_size*this.meta.length;
 		var width_abs = sum_abs, width_rel = this.width - width_abs;
 		for(i=0;i<this.meta.length;i++){
 			m = this.meta[i];

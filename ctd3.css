@@ -50,7 +50,7 @@
 /* contents box */
 div.ctd3_cell_div{
 	height: 1.5em;
-	width: 6em; /* default */
+	/*width: 6em;*/ /* default */
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

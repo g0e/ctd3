@@ -566,7 +566,7 @@ var ctd3 = function(){
 		}else{
 			this.tag_tfoot_div.attr("style","height:0.5em");
 		}
-
+		this.tag_tfoot.select("th").attr("colspan",meta.length+2);
 	};
 	ctd3.Parts.TagTable.prototype.create_filter_form = function(div,meta){
 		var that = this;
@@ -939,7 +939,7 @@ var ctd3 = function(){
 			if(this.dataset_filter){
 				dataset = this.dataset_filter.apply(this,[dataset]);
 			}
-			if(this.table.initialized){
+			if(this.table.initialized && this.table.dataset.length > 0){
 				this.table.dataset = this.table.dataset_manager.setup_dataset(dataset);
 			}else{
 				this.table.init_dataset(dataset);

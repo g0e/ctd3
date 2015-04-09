@@ -168,10 +168,10 @@ var ctd3 = function(){
 			}
 		}
 	};
-	ctd3.Table.prototype.destroy = function(){↲
+	ctd3.Table.prototype.destroy = function(){
 		d3.select("#"+this.div_id).selectAll("*").remove();
-		delete ctd3.instances[this.div_id];↲
-	};↲
+		delete ctd3.instances[this.div_id];
+	};
 
 	/* ------------------------------------------------------------------ */
 	/*  ctd3.Parts                                                        */

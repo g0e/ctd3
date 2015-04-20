@@ -504,7 +504,7 @@ var ctd3 = function(){
 				})
 				.each(function(m,j){
 					if(meta[j].js_format !== undefined){
-						var d = d3.select(this.parentNode.parentNode).datum();
+						var d = d3.select(this.parentNode).datum();
 						meta[j].js_format.bind(this)(m,d,i,j);
 					}
 				})

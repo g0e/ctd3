@@ -599,18 +599,27 @@ var ctd3 = function(){
 		}else if(meta.filter_type == "select"){
 			var select = div.append("select");
 			select.call(function(){
-					var list = [],i,len;
-					for(i=0,len=dm.dataset.length;i<len;i++){
-						if(list.indexOf(dm.dataset[i][meta.name]) == -1){
-							list.push(dm.dataset[i][meta.name]);
-						}
-					}
 					select.append("option").attr("value","").text("-");
-					for(i=0,len=list.length;i<len;i++){
-						select.append("option").attr("value",list[i]).text(list[i])
-							.attr("selected",function(){
-								return (meta.filter_value == list[i])? "" : null;
-							});
+					if(meta.select_options){
+						for(i=0,len=meta.select_options.length;i<len;i++){
+							select.append("option").attr("value",meta.select_options[i][1]).text(meta.select_options[i][0])
+								.attr("selected",function(){
+									return (meta.filter_value == meta.select_options[i][1])? "" : null;
+								});
+						}
+					}else{
+						var list = [],i,len;
+							for(i=0,len=dm.dataset.length;i<len;i++){
+								if(list.indexOf(dm.dataset[i][meta.name]) == -1){
+									list.push(dm.dataset[i][meta.name]);
+								}
+							}
+							for(i=0,len=list.length;i<len;i++){
+								select.append("option").attr("value",list[i]).text(list[i])
+									.attr("selected",function(){
+										return (meta.filter_value == list[i])? "" : null;
+									});
+							}
 					}
 				})
 				.on("change",function(meta){

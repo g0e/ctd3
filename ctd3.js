@@ -773,9 +773,12 @@ var ctd3 = function(){
 				if((meta.filter_type == "text" || meta.filter_type == "number") && meta.filter_value !== undefined){
 					cond.push(function(d){
 						var values = this.filter_value.split(" ");
-						var data = d[this.name];
+						var data = (d["__forsearch_"+this.name])? d["__forsearch_"+this.name]:d[this.name];
 						if(typeof(data) === "object" && data.__search_value){
 							data = data.__search_value;
+						}
+						if(meta.filter_func){
+							data = meta.filter_func(data,meta,d);
 						}
 						for(var j=0;j<values.length;j++){
 							if(values[j].indexOf("<=") === 0 || values[j].indexOf("=<") === 0){

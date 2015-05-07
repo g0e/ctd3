@@ -774,7 +774,7 @@ var ctd3 = function(){
 					cond.push(function(d){
 						var values = this.filter_value.split(" ");
 						var data = (d["__forsearch_"+this.name])? d["__forsearch_"+this.name]:d[this.name];
-						if(typeof(data) === "object" && data.__search_value){
+						if(data && typeof(data) === "object" && data.__search_value){
 							data = data.__search_value;
 						}
 						if(meta.filter_func){
@@ -800,7 +800,7 @@ var ctd3 = function(){
 				}else if(meta.filter_type == "select" && meta.filter_value !== undefined){
 					cond.push(function(d){
 						var data = d[this.name];
-						if(typeof(data) === "object" && data.__search_value){
+						if(data && typeof(data) === "object" && data.__search_value){
 							data = data.__search_value;
 						}
 						return (""+data == ""+this.filter_value);

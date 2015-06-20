@@ -1,0 +1,31 @@
+{
+  "name": "ctd3",
+  "version": "1.0.0",
+  "homepage": "http://g0e.net/ctd3/",
+  "description": "customizable table for d3.js",
+  "main": [
+    "dist/ctd3.js",
+    "dist/ctd3.css"
+  ],
+  "keywords": [
+    "d3.js",
+    "grid",
+	"table"
+  ],
+  "authors": [
+    "g0e"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "repository": {
+    "type": "git",
+	"url": "git://github.com/g0e/ctd3.git"
+  },
+  "dependencies": {
+    "d3": "~3.4.1"
+  }
+}
